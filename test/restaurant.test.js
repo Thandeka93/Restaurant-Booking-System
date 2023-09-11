@@ -2,16 +2,25 @@ import assert from "assert"
 import RestaurantTableBooking from "../services/restaurant.js";
 import pgPromise from 'pg-promise';
 
-const DATABASE_URL = '';
+const DATABASE_URL = 'postgres://ronwtcyb:wybzG-lJSU1S94WCmaOs5Abh49P8dahJ@dumbo.db.elephantsql.com/ronwtcyb';
 
 const connectionString = process.env.DATABASE_URL || DATABASE_URL;
 const db = pgPromise()(connectionString);
 
 describe("The restaurant booking table", function () {
+    this.timeout(10000);
     beforeEach(async function () {
         try {
             // clean the tables before each test run
             // await db.none("TRUNCATE TABLE table_booking RESTART IDENTITY CASCADE;");
+            await db.none("TRUNCATE TABLE table_booking RESTART IDENTITY CASCADE;");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table one', 4, false)");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table two', 6, false)");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table three', 4, false)");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table four', 2, false)");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table five', 6, false)");
+            await db.none("INSERT into table_booking (table_name, capacity, booked) values ('Table six', 4, false)");
+
         } catch (err) {
             console.log(err);
             throw err;
@@ -19,9 +28,62 @@ describe("The restaurant booking table", function () {
     });
 
     it("Get all the available tables", async function () {
-        const restaurantTableBooking = await RestaurantTableBooking(db);
+        const restaurantTableBooking = RestaurantTableBooking(db);
 
-        assert.deepEqual([{}, {}, {}, {}, {}], await restaurantTableBooking.getTables());
+        assert.deepEqual([{
+            id: 1,
+            table_name: 'Table one',
+            capacity: 4,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          },
+          {
+            id: 2,
+            table_name: 'Table two',
+            capacity: 6,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          },
+          {
+            id: 3,
+            table_name: 'Table three',
+            capacity: 4,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          },
+          {
+            id: 4,
+            table_name: 'Table four',
+            capacity: 2,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          },
+          {
+            id: 5,
+            table_name: 'Table five',
+            capacity: 6,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          },
+          {
+            id: 6,
+            table_name: 'Table six',
+            capacity: 4,
+            booked: false,
+            username: null,
+            number_of_people: null,
+            contact_number: null
+          }], await restaurantTableBooking.getTables());
     });
 
 

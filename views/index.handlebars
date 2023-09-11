@@ -4,15 +4,21 @@
 
     <div class="notification is-danger is-light">
         {{!-- you can remove the button below if you want --}}
+        {{#if flash.error}}
         <button class="delete"></button>
+        {{flash.error}}
         Error Flash messages goes here...
         <a href="https://bulma.io/documentation/elements/notification/">Read here if you wanna change the style</a>
+          {{/if}}
     </div>
     <div class="notification is-success is-light">
         {{!-- you can remove the button below if you want --}}
+         {{#if flash.success}}
         <button class="delete"></button>
+        {{flash.success}}
         Success Flash messages goes here...
         <a href="https://bulma.io/documentation/elements/notification/">Read here if you wanna change the style</a>
+          {{/if}}
     </div>
 
 
