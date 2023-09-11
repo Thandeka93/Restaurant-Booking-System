@@ -51,24 +51,21 @@ const restaurant = (db) => {
 
     async function getBookedTables() {
         // get all the booked tables
-        const query = "SELECT * FROM table_booking WHERE booked = true";
-        const result = await db.query(query);
-        return result.rows;
+        //returning the true for booked
+        return await db.manyOrNone("SELECT table_name, capacity, number_of_people, username, contact_number FROM table_booking where booked = $1", true);
     }
 
     async function isTableBooked(tableName) {
         // get booked table by name
-        const query = "SELECT * FROM table_booking WHERE table_name = $1 AND booked = true";
-        const result = await db.query(query, [tableName]);
-        return result && result.rows && result.rows.length > 0;
+        return await db.manyOrNone(`SELECT booked FROM table_booking WHERE table_name = '${tableName}'`).booked;
+       
     }
 
 
     async function cancelTableBooking(tableName) {
         // cancel a table by name
-        const query = "UPDATE table_booking SET booked = false, username = null, number_of_people = null, contact_number = null WHERE table_name = $1 RETURNING *";
-        const result = await db.query(query, [tableName]);
-        return result.rows[0];
+        await db.none(`UPDATE table_booking SET booked = ${false}, SET username = ${""}, SET number_of_people = '${null}', SET contact_number = '${null}' WHERE table_name= '${tableName}'`);
+        
     }
 
     async function editTableBooking(tableName, username, numberOfPeople, contactNumber) {
@@ -86,9 +83,8 @@ const restaurant = (db) => {
 
     async function getBookedTablesForUser(username) {
         // get user table booking
-        const query = "SELECT * FROM table_booking WHERE username = $1 AND booked = true";
-        const result = await db.query(query, [username]);
-        return result.rows;
+        return await db.oneOrNone(`SELECT table_name FROM table_booking WHERE username = '${username}'`);
+        
     }
 
     return {
