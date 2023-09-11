@@ -8,17 +8,46 @@ const restaurant = (db) => {
         return tables;
     }
 
-    async function bookTable(tableName, username, numberOfPeople, contactNumber) {
+    async function bookTable(book) {
         // Book a table by name
-        const query = `
-            INSERT INTO table_booking (table_name, booked, username, number_of_people, contact_number)
-            VALUES ($1, true, $2, $3, $4)
-            RETURNING *;
-        `;
-        const values = [tableName, username, numberOfPeople, contactNumber];
-        const result = await db.query(query, values);
-        return result.rows[0];
+        const tableName = book.tableId;
+        const seat = book.booking_size;
+        const name = book.username;
+        const number = book.phone_number;
+    
+        // Check if the table exists
+        const tableExists = await db.oneOrNone(`SELECT * FROM table_booking WHERE table_name = $1`, [tableName]);
+    
+        if (tableExists === null) {
+            return "Invalid table name provided";
+        }
+    
+        // Check if the table is available
+        const tableCapacity = tableExists.capacity;
+        const bookedSeats = await db.oneOrNone(`SELECT COUNT(*) FROM table_booking WHERE table_name = $1 AND booked = true`, [tableName]);
+        const availableSeats = tableCapacity - bookedSeats;
+    
+        if (seat > availableSeats) {
+            return "Not enough available seats for this booking";
+        }
+    
+        // Check for valid username and phone number
+        if (name === "") {
+            return "Please enter a username";
+        }
+    
+        if (number === "") {
+            return "Please enter a contact number";
+        }
+    
+        // Book the table
+        await db.query(`
+            INSERT INTO table_booking (table_name, booked, username, number_of_people, contact_number) 
+            VALUES ($1, true, $2, $3, $4)`, [tableName, name, seat, number]);
+    
+        return "Table booked successfully";
     }
+    
 
     async function getBookedTables() {
         // get all the booked tables
@@ -28,12 +57,12 @@ const restaurant = (db) => {
     }
 
     async function isTableBooked(tableName) {
-         // get booked table by name
+        // get booked table by name
         const query = "SELECT * FROM table_booking WHERE table_name = $1 AND booked = true";
         const result = await db.query(query, [tableName]);
         return result && result.rows && result.rows.length > 0;
     }
-    
+
 
     async function cancelTableBooking(tableName) {
         // cancel a table by name

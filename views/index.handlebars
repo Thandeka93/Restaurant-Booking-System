@@ -1,4 +1,4 @@
-<form action="/book" method="post">
+<form action="/book" method="post" id="bookingForm">
 
     <h2 class="title is-2">Book a table</h2>
 
@@ -108,3 +108,34 @@
     </div>
 </form>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const bookingForm = document.getElementById("bookingForm");
+    
+    bookingForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        // Check if the radio button is checked
+        const selectedTable = document.querySelector('input[name="tableId"]:checked');
+        if (!selectedTable) {
+            alert("Please select a table to book.");
+            return;
+        }
+
+        // Validate username and phone number
+        const usernameInput = document.querySelector('input[name="username"]');
+        const phoneNumberInput = document.querySelector('input[name="phone_number"]');
+        const username = usernameInput.value.trim();
+        const phoneNumber = phoneNumberInput.value.trim();
+
+        if (!username || !phoneNumber) {
+            alert("Please enter a valid username and phone number.");
+            return;
+        }
+
+        // Submit the form
+        bookingForm.submit();
+    });
+});
+</script>

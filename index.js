@@ -38,8 +38,13 @@ app.use(session({
 }));
 
 app.get("/", async (req, res) => {
-    const tables = await restaurantAPI.getTables();
-    res.render('index', { tables : [{}, {}, {booked : true}, {}, {}, {}]})
+    try {const tables = await restaurantAPI.getTables();
+    res.render('index', { tables : tables})
+    }catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
 
@@ -49,18 +54,55 @@ app.get("/bookings", (req, res) => {
 
 
 app.post("/book", async (req, res) => {
-    // GET the username, phone number and booking size
-    const { username, phone_number, booking_size } = req.body;
+    // Get username, phone number, booking size
+    const { username, phone_number, booking_size, tableId } = req.body;
 
     // INSERT booking details into the factory function
-    await restaurantAPI.bookTable({
+    const result = await restaurantAPI.bookTable({
         username,
         phone_number,
-        booking_size
+        booking_size,
+        tableId
     });
+    // Check if the result is a success message
+    if (result === "Table booked successfully") {
+        req.flash("success", result);
+    } else {
+        req.flash("error", result);
+    }
 
     // GET back to the home route
     res.redirect("/");
+});
+
+// Route: Show bookings made by a given user
+app.get("/bookings/:username", async (req, res) => {
+    try {
+        const username = req.params.username;
+        const userBookings = await restaurantAPI.getBookedTablesForUser(username);
+        res.render('userBookings', { userBookings });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// Route: Cancel a booking
+app.post("/cancel", async (req, res) => {
+    try {
+        const { username, tableName } = req.body; // Use req.body to get the parameters
+        // Call the restaurantAPI.cancelTableBooking function with username and tableName
+        const canceledBooking = await restaurantAPI.cancelTableBooking(tableName); // Correct the function call
+        if (canceledBooking) {
+            req.flash("success", "Booking canceled successfully");
+        } else {
+            req.flash("error", "Booking not found or unable to cancel");
+        }
+        res.redirect(`/bookings/${username}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
 

@@ -131,7 +131,7 @@ describe("The restaurant booking table", function () {
     it("should not be able to book a table with an invalid table name.", async function () {
         const restaurantTableBooking = await RestaurantTableBooking(db);
 
-        await restaurantTableBooking.bookTable({
+        const message = await restaurantTableBooking.bookTable({
             tableName: 'Table eight',
             username: 'Kim',
             phoneNumber: '084 009 8910',
